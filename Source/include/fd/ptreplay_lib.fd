@@ -1,0 +1,28 @@
+##base _PTReplayBase
+##bias 30
+##public
+PTLoadModule(name)(a0)
+PTUnloadModule(module)(a0)
+PTPlay(module)(a0)
+PTStop(module)(a0)
+PTPause(module)(a0)
+PTResume(module)(a0)
+PTFade(module,speed)(a0,d0)
+PTSetVolume(module,vol)(a0,d0)
+PTSongPos(module)(a0)
+PTSongLen(module)(a0)
+PTSongPattern(module,Pos)(a0,d0)
+PTPatternPos(module)(a0)
+PTPatternData(module,Pattern,Row)(a0,d0,d1)
+PTInstallBits(module,Restart,NextPattern,NextRow,Fade)(a0,d0,d1,d2,d3)
+PTSetupMod(ModuleFile)(a0)
+PTFreeMod(module)(a0)
+PTStartFade(module,speed)(a0,d0)
+PTOnChannel(module,Channels)(a0,d0)
+PTOffChannel(module,Channels)(a0,d0)
+PTSetPos(module,Pos)(a0,d0)
+PTSetPri(Pri)(d0)
+PTGetPri()()
+PTGetChan()()
+PTGetSample(module,Nr)(a0,d0)
+##end

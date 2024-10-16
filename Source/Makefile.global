@@ -1,0 +1,38 @@
+GLOBAL_MAKEFILE_INCLUDED=y
+
+include $(ROOTPATH)Makefile.config.default
+ifeq ($(wildcard $(ROOTPATH)Makefile.config),$(ROOTPATH)Makefile.config)
+	include $(ROOTPATH)Makefile.config
+endif
+
+ifeq ($(BUILD_QUIET_COMPILE), y)
+ifneq ($(BUILD_REALLY_QUIET_COMPILE), y)
+COMPILEECHO=@echo Compiling $@ ...
+ASSEMBLEECHO=@echo Assembling $@ ...
+endif
+COMPILEPREFIX=@
+endif
+
+.c.o:
+	$(COMPILEECHO)
+	$(COMPILEPREFIX)$(CC) $(CFLAGS) $(CPUOPTFLAGS) -c $< -o $@
+
+.c.ho:
+	$(COMPILEECHO)
+	$(COMPILEPREFIX)$(HOSTCC) $(HOSTCFLAGS) -c $< -o $@
+
+.asm.o:
+	$(ASSEMBLEECHO)
+	$(COMPILEPREFIX)$(AS) $(ASFLAGS) $< -o $@
+
+LAIREMESSCOMPILE=$(COMPILEPREFIX)$(CC) $(CFLAGS) $(CPUOPTFLAGS) -c $^ -o $@
+
+ifeq ($(BUILD_QUIET_LINK), y)
+ifneq ($(BUILD_REALLY_QUIET_LINK), y)
+LINKECHO=@echo Linking $@ ...
+endif
+LINKPREFIX=@
+endif
+
+.SUFFIXES: .ho .asm
+

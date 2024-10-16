@@ -1,0 +1,8 @@
+OBJS	=	init_os3.o ptreplay_private_os3.o player_main_os3.o qport.o \
+			PTLoadModule.o PTUnloadModule.o PTPlay.o \
+			PTStop.o PTPause.o PTResume.o PTFade.o \
+			PTSetVolume.o PTSongPos.o PTSongLen.o PTSongPattern.o \
+			PTPatternPos.o PTPatternData.o PTInstallBits.o \
+			PTSetupMod.o PTFreeMod.o PTStartFade.o PTOnChannel.o \
+			PTOffChannel.o PTSetPos.o PTSetPri.o PTGetPri.o \
+			PTGetChan.o PTGetSample.o

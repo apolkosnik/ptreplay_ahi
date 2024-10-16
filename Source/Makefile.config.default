@@ -1,0 +1,46 @@
+# Build verbosity options
+
+BUILD_ENTER_DIR_MSG=y
+BUILD_LEAVE_DIR_MSG=y
+BUILD_QUIET_COMPILE=y
+BUILD_REALLY_QUIET_COMPILE=n
+BUILD_QUIET_LINK=y
+BUILD_REALLY_QUIET_LINK=n
+
+# Build tools & options
+
+CC=ppc-morphos-gcc
+LD=ppc-morphos-ld
+AS=ppc-morphos-as
+STRIP=ppc-morphos-strip
+AR=ppc-morphos-ar
+RANLIB=ppc-morphos-ranlib
+OBJCOPY=ppc-morphos-objcopy
+
+CFLAGS=-O2 -Wall -noixemul
+STRIPFLAGS=--strip-unneeded --remove-section=.comment
+
+# Compiler-dependant stuff we need to build Altivec code
+ALTIVEC_CFLAGS=-fvec
+ALTIVEC_LIBS=-lgcc
+
+# Examples on how to specify local build optimisations in Makefile.config
+#
+# CPUOPTFLAGS=-mcpu=750
+
+# install path
+
+BOOTDEVICE = sys:
+
+# Host build tools. For programs which are used during the build.
+
+HOSTCC=gcc
+HOSTLD=ld
+HOSTAS=as
+HOSTSTRIP=strip
+HOSTAR=ar
+HOSTRANLIB=ranlib
+
+HOSTCFLAGS=-O2 -Wall
+HOSTSTRIPFLAGS=--strip-unneeded --remove-section=.comment
+

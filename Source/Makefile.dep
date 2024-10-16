@@ -1,0 +1,29 @@
+
+PTFade.o: PTFade.c ptreplay_private.h
+PTFreeMod.o: PTFreeMod.c ptreplay_private.h
+PTGetChan.o: PTGetChan.c ptreplay_private.h
+PTGetPri.o: PTGetPri.c ptreplay_private.h
+PTGetSample.o: PTGetSample.c ptreplay_private.h
+PTInstallBits.o: PTInstallBits.c ptreplay_private.h
+PTLoadModule.o: PTLoadModule.c ptreplay_private.h
+PTOffChannel.o: PTOffChannel.c ptreplay_private.h
+PTOnChannel.o: PTOnChannel.c ptreplay_private.h
+PTPatternData.o: PTPatternData.c ptreplay_private.h
+PTPatternPos.o: PTPatternPos.c ptreplay_private.h
+PTPause.o: PTPause.c ptreplay_private.h
+PTPlay.o: PTPlay.c ptreplay_private.h
+PTResume.o: PTResume.c ptreplay_private.h
+PTSetPos.o: PTSetPos.c ptreplay_private.h
+PTSetPri.o: PTSetPri.c ptreplay_private.h
+PTSetVolume.o: PTSetVolume.c ptreplay_private.h
+PTSetupMod.o: PTSetupMod.c ptreplay_private.h
+PTSongLen.o: PTSongLen.c ptreplay_private.h
+PTSongPattern.o: PTSongPattern.c ptreplay_private.h
+PTSongPos.o: PTSongPos.c ptreplay_private.h
+PTStartFade.o: PTStartFade.c ptreplay_private.h
+PTStop.o: PTStop.c ptreplay_private.h
+PTUnloadModule.o: PTUnloadModule.c ptreplay_private.h
+init_os3.o: init_os3.c ptreplay_private.h ptreplay.library_rev.h
+player_main_os3.o: player_main_os3.c ptreplay_private.h qport.h
+ptreplay_private_os3.o: ptreplay_private_os3.c ptreplay_private.h
+qport.o: qport.c
