@@ -1,4 +1,12 @@
+/*
+ * ptreplay.library (C) 2009 Fredrik Wikstrom
+*/
+
 #include "ptreplay_private.h"
+#include <reaction/reaction_macros.h>
+#include <classes/requester.h>
+#include <proto/intuition.h>
+#include <proto/requester.h>
 
 /* Version Tag */
 #include "ptreplay.library_rev.h"
@@ -9,9 +17,6 @@ struct Library *PtPlayBase;
 struct ExecIFace *IExec;
 struct DOSIFace *IDOS;
 struct PtPlayIFace *IPtPlay;
-
-STATIC int32 OpenLibs ();
-STATIC void CloseLibs ();
 
 /*
  * The system (and compiler) rely on a symbol named _start which marks
@@ -25,91 +30,154 @@ STATIC void CloseLibs ();
  *
  */
 int32 _start(void) {
-    /* If you feel like it, open DOS and print something to the user */
-    return RETURN_FAIL;
+	/* If you feel like it, open DOS and print something to the user */
+	return RETURN_FAIL;
+}
+
+static uint32 ErrorReq (const char *title, const char *body, const char *gadgets) {
+	uint32 result = 0;
+
+	struct Library *IntuitionBase;
+	struct IntuitionIFace *IIntuition;
+	struct Library *RequesterBase;
+	struct RequesterIFace *IRequester;
+	
+	IntuitionBase = IExec->OpenLibrary("intuition.library", 52);
+	IIntuition = (struct IntuitionIFace *)IExec->GetInterface(IntuitionBase, "main", 1, NULL);
+	RequesterBase = IExec->OpenLibrary("requester.class", 52);
+	IRequester = (struct RequesterIFace *)IExec->GetInterface(RequesterBase, "main", 1, NULL);
+
+	if (IIntuition && IRequester) {
+		struct Screen *screen;
+		Object *requester;
+
+		screen = IIntuition->LockPubScreen(NULL);
+
+		requester = RequesterObject,
+			REQ_TitleText,	title,
+			REQ_BodyText,	body,
+			REQ_GadgetText,	gadgets,
+			REQ_Image,		REQIMAGE_ERROR,
+		End;
+
+		if (screen && requester) {
+			result = IIntuition->IDoMethod(requester, RM_OPENREQ, NULL, NULL, screen);
+		}
+
+		IIntuition->DisposeObject(requester);
+		IIntuition->UnlockPubScreen(NULL, screen);
+	}
+	
+	IExec->DropInterface((struct Interface *)IRequester);
+	IExec->CloseLibrary(RequesterBase);
+	IExec->DropInterface((struct Interface *)IIntuition);
+	IExec->CloseLibrary(IntuitionBase);
+	
+	return result;
 }
 
 /* Open the library */
 STATIC struct PTReplayBase *libOpen(struct LibraryManagerInterface *Self, ULONG version) {
-    struct PTReplayBase *libBase = (struct PTReplayBase *)Self->Data.LibBase; 
+	struct PTReplayBase *libBase = (struct PTReplayBase *)Self->Data.LibBase;
+	struct PTReplayBase *result = libBase;
 
-    if (version > VERSION) {
-        return NULL;
-    }
+	if (version > VERSION) {
+		return NULL;
+	}
 
-    /* Add any specific open code here 
-       Return 0 before incrementing OpenCnt to fail opening */
+	IExec->MutexObtain(libBase->mutex);
 
-    /* Add up the open count */
-    libBase->libNode.lib_OpenCnt++;
-    return libBase;
+	/* Add up the open count */
+	libBase->libNode.lib_OpenCnt++;
+
+	/* Add any specific open code here 
+	   Return 0 before incrementing OpenCnt to fail opening */
+	if (!IPtPlay) {
+		PtPlayBase = IExec->OpenLibrary("ptplay.library", 0);
+		IPtPlay = (struct PtPlayIFace *)IExec->GetInterface(PtPlayBase, "main", 1, NULL);
+		if (!IPtPlay) {
+			IExec->CloseLibrary(PtPlayBase);
+			PtPlayBase = NULL;
+			ErrorReq("ptreplay.library", "Could not open ptplay.library", "_Ok");
+			libBase->libNode.lib_OpenCnt--;
+			result = NULL;
+		}
+	}
+	
+	IExec->MutexRelease(libBase->mutex);
+
+	return result;
 }
 
 /* Close the library */
 STATIC BPTR libClose(struct LibraryManagerInterface *Self) {
-    struct PTReplayBase *libBase = (struct PTReplayBase *)Self->Data.LibBase;
-    /* Make sure to undo what open did */
+	struct PTReplayBase *libBase = (struct PTReplayBase *)Self->Data.LibBase;
 
-    /* Make the close count */
-    libBase->libNode.lib_OpenCnt--;
+	IExec->MutexObtain(libBase->mutex);
 
-    return ZERO;
+	/* Make the close count */
+	libBase->libNode.lib_OpenCnt--;
+
+	/* Make sure to undo what open did */
+	if (libBase->libNode.lib_OpenCnt == 0) {
+		IExec->DropInterface((struct Interface *)IPtPlay);
+		IExec->CloseLibrary(PtPlayBase);
+		IPtPlay = NULL;
+		PtPlayBase = NULL;
+	}
+
+	IExec->MutexRelease(libBase->mutex);
+
+	return ZERO;
 }
 
 /* Expunge the library */
 STATIC BPTR libExpunge(struct LibraryManagerInterface *Self) {
-    /* If your library cannot be expunged, return 0 */
-    BPTR result = ZERO;
-    struct PTReplayBase *libBase = (struct PTReplayBase *)Self->Data.LibBase;
-    if (libBase->libNode.lib_OpenCnt == 0) {
-	    result = libBase->segList;
-        /* Undo what the init code did */
-        CloseLibs();
+	/* If your library cannot be expunged, return 0 */
+	BPTR result = ZERO;
+	struct PTReplayBase *libBase = (struct PTReplayBase *)Self->Data.LibBase;
+	if (libBase->libNode.lib_OpenCnt == 0) {
+		result = libBase->segList;
+		/* Undo what the init code did */
+		IExec->DropInterface((struct Interface *)IDOS);
+		IExec->CloseLibrary(DOSBase);
+		IExec->FreeSysObject(ASOT_MUTEX, libBase->mutex);
 
-        IExec->Remove((struct Node *)libBase);
-        IExec->DeleteLibrary((struct Library *)libBase);
-    } else {
-        result = ZERO;
-        libBase->libNode.lib_Flags |= LIBF_DELEXP;
-    }
-    return result;
+		IExec->Remove((struct Node *)libBase);
+		IExec->DeleteLibrary((struct Library *)libBase);
+	} else {
+		result = ZERO;
+		libBase->libNode.lib_Flags |= LIBF_DELEXP;
+	}
+	return result;
 }
 
 /* The ROMTAG Init Function */
 STATIC struct PTReplayBase *libInit(struct PTReplayBase *libBase, BPTR seglist, struct ExecIFace *exec) {
-    IExec = exec;
-    libBase->libNode.lib_Node.ln_Type = NT_LIBRARY;
-    libBase->libNode.lib_Node.ln_Pri  = 0;
-    libBase->libNode.lib_Node.ln_Name = "ptreplay.library";
-    libBase->libNode.lib_Flags        = LIBF_SUMUSED|LIBF_CHANGED;
-    libBase->libNode.lib_Version      = VERSION;
-    libBase->libNode.lib_Revision     = REVISION;
-    libBase->libNode.lib_IdString     = VSTRING;
-    libBase->segList = seglist;
+	IExec = exec;
+	libBase->libNode.lib_Node.ln_Type = NT_LIBRARY;
+	libBase->libNode.lib_Node.ln_Pri  = 0;
+	libBase->libNode.lib_Node.ln_Name = "ptreplay.library";
+	libBase->libNode.lib_Flags        = LIBF_SUMUSED|LIBF_CHANGED;
+	libBase->libNode.lib_Version      = VERSION;
+	libBase->libNode.lib_Revision     = REVISION;
+	libBase->libNode.lib_IdString     = VSTRING;
+	libBase->segList                  = seglist;
+	libBase->mutex                    = IExec->AllocSysObject(ASOT_MUTEX, NULL);
 
-	if (!OpenLibs()) {
-		CloseLibs();
+	if (!libBase->mutex) {
 		return NULL;
 	}
 
-    return libBase;
-}
-
-STATIC int32 OpenLibs () {
 	DOSBase = IExec->OpenLibrary("dos.library", 52);
 	IDOS = (struct DOSIFace *)IExec->GetInterface(DOSBase, "main", 1, NULL);
-	if (!IDOS) return FALSE;
-	PtPlayBase = IExec->OpenLibrary("ptplay.library", 0);
-	IPtPlay = (struct PtPlayIFace *)IExec->GetInterface(PtPlayBase, "main", 1, NULL);
-	if (!IPtPlay) return FALSE;
-	return TRUE;
-}
+	if (!IDOS) {
+		IExec->CloseLibrary(DOSBase);
+		IExec->FreeSysObject(ASOT_MUTEX, libBase->mutex);
+		return NULL;
+	}
 
-STATIC void CloseLibs () {
-	IExec->DropInterface((struct Interface *)IPtPlay);
-	IExec->CloseLibrary(PtPlayBase);
-	IExec->DropInterface((struct Interface *)IDOS);
-	IExec->CloseLibrary(DOSBase);
+	return libBase;
 }
 
 /* ------------------- Manager Interface ------------------------ */

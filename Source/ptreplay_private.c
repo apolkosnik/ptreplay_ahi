@@ -42,7 +42,8 @@ struct Module *_PTSetupModInternal(struct PTReplayIFace *Self,
 	
 	module->parent_proc = (struct Process *)IExec->FindTask(NULL);
 	module->player_proc = IDOS->CreateNewProcTags(
-		NP_Name,					"ptreplay.library",
+		NP_Priority,				5,
+		NP_Name,					"ptreplay.library player process",
 		NP_Entry,					player_main,
 		NP_Child,					TRUE,
 		NP_StackSize,				65536,

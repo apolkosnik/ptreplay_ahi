@@ -4,6 +4,7 @@
 
 #include <exec/execbase.h>
 #include <proto/exec.h>
+#include <exec/lists.h>
 
 void CreateQPort(struct MsgPort *port)
 {
@@ -15,7 +16,7 @@ void CreateQPort(struct MsgPort *port)
 		SetSignal(0, SIGF_SINGLE);
 	}
 	port->mp_SigTask      = SysBase->ThisTask;
-	NEWLIST(&port->mp_MsgList);
+	NewList(&port->mp_MsgList);
 }
 
 void DeleteQPort(struct MsgPort *port)

@@ -1,4 +1,3 @@
-#include <proto/muimaster.h>
 
 #include "ptreplay_private.h"
 #include "ptreplay.library_rev.h"
@@ -108,16 +107,7 @@ STATIC struct Library *LibOpen(struct PTReplayBase *libbase)
 
 			if (PtPlayBase == NULL)
 			{
-				struct Library *MUIMasterBase;
-
-				MUIMasterBase = OpenLibrary("muimaster.library", 4);
-
-				if (MUIMasterBase)
-				{
-					MUI_RequestA(NULL, NULL, 0, "ptreplay.library", "OK", "Could not open ptplay.library", NULL);
-					CloseLibrary(MUIMasterBase);
-				}
-
+				Printf("Unable to open ptplay.library\n");
 				libbase->libNode.lib_OpenCnt--;
 				base = NULL;
 			}
@@ -479,7 +469,7 @@ STATIC CONST struct MyInitData InitData	=
 {
 	/* This is fucked way of coding but I can not let old habits go :-) */
 	{ 0xa0,  8, NT_LIBRARY, 0 },
-	{ 0xa0,  9, -10       , 0 },
+	{ 0xa0,  9, 5       , 0 },
 	{ 0x80, 10 }, (ULONG)&libname,
 	{ 0xa0, 14, LIBF_SUMUSED|LIBF_CHANGED, 0 },
 	{ 0x90, 20 }, VERSION,

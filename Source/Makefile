@@ -1,37 +1,42 @@
-# $Id: Makefile,v 1.8 2009/02/24 00:10:11 itix Exp $
+# Project files
 
-ROOTPATH=./
-include $(ROOTPATH)Makefile.global
+###########################################################
+# VBCC
+###########################################################
 
-CFLAGS+=-Iinclude -DAROS_ALMOST_COMPATIBLE -O3 -finline-functions -mcpu=750 -mmultiple -mstring
+CC			=	/opt/amiga-cc/vbcc/bin/vc
+CDEFS		=	+aos68k -DAROS_ALMOST_COMPATIBLE
+#CDEFS		=	-DAROS_ALMOST_COMPATIBLE
+CWARN		=	
+CFLAGS	=	$(CDEFS) $(CWARN) +aos68k -O3 -c -c99 -schedule -maxoptpasses=40 -sc -cpu=68020 -I/opt/amiga-cc/vbcc/targets/m68k-amigaos -I/opt/amiga-cc/vbcc/targets/m68k-amigaos/include -I/usr/local/include -I/usr/include -Iinclude -D__VBCC__ -DAMIGA -I/opt/amiga-cc/vbcc/targets/m68k-amigaos/include  -k -size -inline-size=20 -unroll-size=20 -schedule
+LDFLAGS	=  -nostdlib -final
+TARGET	=	ptreplay.library
 
-include makefile.objs
+ECHO = echo
+ECHE = echo -e
+BOLD = \033[1m
+NRML = \033[22m
 
-CATALOGS =
-TARGET = ptreplay.library.elf
+COMPILING = @$(ECHE) "compiling $(BOLD)$@$(NRML)..."
+LINKING = @$(ECHE) "linking $(BOLD)$@$(NRML)..."
+STRIPPING = @$(ECHE) "stripping $(BOLD)$@$(NRML)..."
+ARCHIVING = @$(ECHE) "archiving $(BOLD)$@$(NRML)..."
 
-CATCOMP    = catcomp.pl
+%.o: %.c
+	$(COMPILING)
+	@$(CC) $(CFLAGS) -o $@ $*.c
 
-all: $(TARGET)
+all	: $(TARGET)
+
+-include makefile.objs
+-include makefile.dep
+
+###########################################################
+# VBCC OS2
+###########################################################
 
 $(TARGET): $(OBJS)
-	$(LINKECHO)
-	$(LINKPREFIX)$(CC) -noixemul -nostartfiles $(OBJS) -o $@.db
-	$(LINKPREFIX)$(STRIP) $(STRIPFLAGS) $@.db -o $@
-	$(LINKPREFIX)chmod u+x $@
+		$(LINKING)
+		@vc +aos68k -O3 $(LDFLAGS) -o $@ $(OBJS) -lzlib -ljpeg -lamiga -lvc
 
-clean:
-	rm -f $(TARGET) $(TARGET).db $(TARGET).s $(OBJS)
-
-dump:
-	objdump --disassemble-all --reloc $(TARGET).db >$(TARGET).s
-
-install: all
-	cp $(TARGET) /Libs/ptreplay.library
-	flushlib $(TARGET) QUIET
-
-dep:
-	echo >Makefile.dep
-	$(CC) -MM $(CFLAGS) `ls *.c` >>Makefile.dep
-
-include Makefile.dep
+		#@vc +aos68k -O3 $(LDFLAGS) -o $@ $(OBJS) -lzlib -lamiga -lvc
