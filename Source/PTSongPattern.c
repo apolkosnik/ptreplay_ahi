@@ -3,7 +3,11 @@
 UBYTE _PTReplay_PTSongPattern(struct PTReplayIFace *Self,
 	struct Module *module, UWORD Pos)
 {
-	/* Write me. Really, I dare you! */
-	//IExec->DebugPrintF("Function ptreplay::PTSongPattern not implemented\n");
+	dbug(("ptreplay::PTSongPattern\n"));
+
+    UBYTE* p = (UBYTE *) module->file_data;
+    if (Pos <= 128) {
+        return p[952 + Pos];
+    }
 	return (UBYTE)0;
 }
