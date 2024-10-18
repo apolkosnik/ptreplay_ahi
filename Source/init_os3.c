@@ -469,7 +469,7 @@ STATIC CONST struct MyInitData InitData	=
 {
 	/* This is fucked way of coding but I can not let old habits go :-) */
 	{ 0xa0,  8, NT_LIBRARY, 0 },
-	{ 0xa0,  9, 5       , 0 },
+	{ 0xa0,  9, 0       , 0 },
 	{ 0x80, 10 }, (ULONG)&libname,
 	{ 0xa0, 14, LIBF_SUMUSED|LIBF_CHANGED, 0 },
 	{ 0x90, 20 }, VERSION,

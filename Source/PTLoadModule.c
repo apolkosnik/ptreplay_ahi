@@ -6,9 +6,9 @@ STATIC APTR load_file (const char *filename, int32 *file_size) {
 	file = Open(filename, MODE_OLDFILE);
 	if (file)
 	{
-		TEXT buf[500];
-		struct FileInfoBlock *fib = (APTR)&buf;
-		//D_S(struct FileInfoBlock, fib);
+		//EXT buf[500*2]; // double, just in case
+		//struct FileInfoBlock *fib = (APTR)&buf;
+		D_S(struct FileInfoBlock, fib);
 		if (ExamineFH(file, fib))
 		{
 			*file_size = fib->fib_Size;

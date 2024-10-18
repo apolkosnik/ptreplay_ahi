@@ -26,7 +26,7 @@ typedef ULONG uint32;
  * FIB or DISK_INFO as auto variables)
  */
 #define D_S(type,name) char a_##name[sizeof(type)+3]; \
-                       type *name = (type *)((IPTR)(a_##name+3) & ~3)
+                       type *name = (type *)((ULONG)(a_##name+3) & ~3)
 
 #define PTReplayIFace PTReplayBase
 
