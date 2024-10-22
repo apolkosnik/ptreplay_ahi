@@ -34,25 +34,19 @@ APTR _PTReplay_PTPatternData(struct PTReplayIFace *Self,
 
 	dbug(("ptreplay::PTPatternData TESTME!\n"));
 
-    pt_mod_s* mod;
-	pt_pattern_s *p;
+     ULONG pat;
+     pt_pattern_s *p;
+     //pt_patterndata_s *ptd;
 	APTR *ptd;
 
     if ((Pattern <= 127) && (Row <= 63)) {
 		ObtainSemaphore(&module->mutex);
-		//PtGetAttr(module->mod_handle, PTPLAY_PatternData, &res);
-
-
-
-		mod = (pt_mod_s *)module->mod_handle;
-
-		p = mod->pattern + mod->pos[Pattern];		/* pattern */
-
-		ptd = p->data[Row];							/* patterndata */
-
+	     PtGetAttr(module->mod_handle, PTPLAY_PatternData, &pat);
+		p = (struct Pattern *)pat + Pattern;		/* pattern */
+		ptd = p->data[Row];		/* patterndata */
 		ReleaseSemaphore(&module->mutex);
     }
 
 	return ptd;
-
 }
+
