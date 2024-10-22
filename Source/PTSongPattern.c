@@ -43,6 +43,6 @@ UBYTE _PTReplay_PTSongPattern(struct PTReplayIFace *Self,
 		ReleaseSemaphore(&module->mutex);
      }
 
-	return (UBYTE)res;
+	return (UBYTE)res & 127;
 
 }

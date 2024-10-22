@@ -1,0 +1,21 @@
+#
+#$VER: PTReplay Examples V2.0 (28.12.94)
+#
+
+ALL:	SmallPlay PT-Player
+
+SmallPlay: SmallPlay.c
+	sc SmallPlay.c link nodebug utillib opt strmerge noicons
+
+PT-Player: PT-Player.o Control.o Control_temp.o
+	slink LIB:cback.o PT-Player.o Control.o control_temp.o to \
+	PT-PLayer LIB LIB:sc.lib STRIPDBG SC SD 
+
+PT-Player.o: PT-Player.c Control.h
+	sc PT-Player.c nodebug UtilLib opt strmerge
+
+Control.o: Control.c Control.h
+	sc Control.c  nodebug UtilLib opt strmerge ignore 147+154
+
+Control_temp.o: Control_temp.c control.h
+	sc Control_temp.c nodebug UtilLib opt strmerge

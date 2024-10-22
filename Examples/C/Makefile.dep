@@ -1,0 +1,3 @@
+PT-Player.o: PT-Player.c control.h
+control.o: control.c control.h
+control_temp.o: control_temp.c control.h

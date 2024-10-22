@@ -1,0 +1,14 @@
+
+                                 Play v1.0
+
+Play is a tiny example in assembler of how to use the most common functions
+in ptreplay.library.
+Just assemble it with Devpav v3.02 or your own favourite assembler, some
+adjustments may be done when using the later.
+
+To use it:
+
+15.Ram Disk:> Play SFX:Mod./Mod.95-Raver's Mix
+
+And then it will play the module and wait for you to press CTRL_C to
+stop it.

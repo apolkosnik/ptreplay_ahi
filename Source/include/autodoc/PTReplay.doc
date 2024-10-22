@@ -1,0 +1,649 @@
+TABLE OF CONTENTS
+
+ptreplay.library/PTFade
+ptreplay.library/PTFreeMod
+ptreplay.library/PTGetChan
+ptreplay.library/PTGetPri
+ptreplay.library/PTGetSample
+ptreplay.library/PTInstallBits
+ptreplay.library/PTLoadModule
+ptreplay.library/PTOffChannel
+ptreplay.library/PTOnChannel
+ptreplay.library/PTPatternData
+ptreplay.library/PTPatternPos
+ptreplay.library/PTPause
+ptreplay.library/PTPlay
+ptreplay.library/PTResume
+ptreplay.library/PTSetPos
+ptreplay.library/PTSetPri
+ptreplay.library/PTSetupMod
+ptreplay.library/PTSetVolume
+ptreplay.library/PTSongLen
+ptreplay.library/PTSongPattern
+ptreplay.library/PTSongPos
+ptreplay.library/PTStartFade
+ptreplay.library/PTStop
+ptreplay.library/PTUnloadModule
+ptreplay.library/PTFade                               ptreplay.library/PTFade
+
+   NAME
+        PTFade -- Let a module "slide away" before it's stopped (V2)
+
+   SYNOPSIS
+        PTFade(module,speed)
+                A0     D0
+
+        void PTFade(struct Module *, UBYTE);
+
+   FUNCTION
+        This function does smooth vol slidedown until volume reaches zero,
+        then the module is stoped and the function returns. The speed is
+        given in the number of "vblanks" (ie CIA timeouts because it uses
+        CIA timing instead of vblank timing) between each step.
+
+   INPUTS
+        module - module that is to be stoped.
+        speed - fading speed.
+
+   SEE ALSO
+        PTStartFade()
+
+ptreplay.library/PTFreeMod                         ptreplay.library/PTFreeMod
+
+   NAME
+        PTFreeMod -- Deallocates a module create with PTSetupMod. (V4)
+
+   SYNOPSIS
+        PTFreeMod(Module)
+                  A0
+
+        void PTFreeMod(struct Module *);
+
+   FUNCTION
+        This function will free all memory allocated by the PTSetupMod
+        function.
+
+   INPUTS
+        Module - a module returned by PTSetupMod().
+
+   SEE ALSO
+        PTSetupMod()
+
+ptreplay.library/PTGetChan                         ptreplay.library/PTGetChan
+
+   NAME   
+        PTGetChan -- Return wich channels ptreplay owns. (V6)
+
+   SYNOPSIS
+        Chans=PTGetChan()
+        D0
+
+        BYTE PTGetChan(void);
+
+   FUNCTION
+        This function returns an array there bit 0 is set if it owns channel
+        0, bit 1 is set if it owns channel 1 and so on.
+
+   RESULT
+        Chans - An bitarray telling you wich channel it owns.
+
+   SEE ALSO
+
+ptreplay.library/PTGetPri                           ptreplay.library/PTGetPri
+
+   NAME   
+        PTGetPri -- Return the priority currently used. (V5)
+
+   SYNOPSIS
+        Pri=PTSetPri()
+        D0
+        BYTE PTSetPri(void);
+
+   FUNCTION
+        This function returnes the current priority on wich ptreplay hold
+        it's channels.
+
+   RESULT
+        Pri - The priority currently used by ptreplay.
+
+   SEE ALSO
+        PTSetPri()
+
+ptreplay.library/PTGetSample                     ptreplay.library/PTGetSample
+
+   NAME   
+        PTGetSample -- Return info on a sample. (V6)
+
+   SYNOPSIS
+        Sam=PTGetSample(Module,Num);
+        D0              A0     D0
+
+        struct PTSample *PTGetSample(struct Module *,WORD);
+
+   FUNCTION
+        This function collects info about the given sample-number.
+
+        it returns the folowing structure:
+        struct PTSample
+        {
+            UBYTE Name[22];    /* Null terminated string with samplename */
+            UWORD Length;      /* Sample length in words */
+            UBYTE FineTune;    /* FineTune of sample in lower 4 bits */
+            UBYTE Volume;      /* Volume of sample */
+            UWORD Repeat;      /* Repeat start in number of words */
+            UWORD Replen;      /* Repeat length in number of words */
+        };
+
+   INPUTS
+        Module - Pointer to a loaded module
+        Num    - Number of the sample you whant info about. MUST BE 0-31
+
+   RESULT
+        Sam - Info about the given sample.
+
+   SEE ALSO
+
+ptreplay.library/PTInstallBits                 ptreplay.library/PTInstallBits
+
+   NAME
+        PTInstallBits -- Defines what to be signaled at and how (V4)
+
+   SYNOPSIS
+        PTInstallBits(Module, Restart, Pos, Row, Fade);
+                      A0      D0       D1   D2   D3
+
+        void PTInstallBits(struct Module *, BYTE, BYTE, BYTE, BYTE);
+
+   FUNCTION
+        This function is used to inform ptreplay which signals to send to
+        this task at the given positions. Currently it can only be set up to
+        signal one task/module (the one calling this function) this may
+        however change in future. A signalbit of -1 tells ptreplay not to
+        signal you at that specific location.
+
+   INPUTS
+        Module - module to use the given signals
+        Restart - Bit to set when a module restarts from beginning or -1 for
+            no signal.
+        Pos - Bit to set when moving to next position or -1 for no signal
+        Row - Bit to set when moving to next row in pattern or -1 for no
+            signal.
+        Fade - Bit to set when PTStartFade is done and have stoped module or
+            -1 for no signal.
+
+   EXAMPLE
+        /* This will set signalbit 4 when the module restarts */
+        PTInstallBits(Module, 4, -1, -1, -1);
+
+        /* This will set signalbit 0 when startfade has stopped the module */
+        PTInstallBits(Module, -1, 1, -1, 0);
+
+   SEE ALSO
+        PTStartFade()
+
+ptreplay.library/PTLoadModule                   ptreplay.library/PTLoadModule
+
+   NAME
+        PTLoadModule -- Load a module.
+
+   SYNOPSIS
+        module=PTLoadModule(name)
+          D0                A0
+
+        struct module *PTLoadModule(STRPTR);
+
+   FUNCTION
+        The named file is loaded into chip-mem and if it's identified as an
+        protracker module, a module control structure is created and then
+        returned to you for usage in the other functions like PTPlay
+
+   INPUTS
+        name - name of a module file.
+
+   RESULT
+        module - a pointer to a module control structure or NULL if the
+            module couldn't be loaded.
+
+   SEE ALSO
+        PTSetupMod(), PTUnloadModule()
+
+ptreplay.library/PTOffChannel                   ptreplay.library/PTOffChannel
+
+   NAME   
+        PTOffChannel -- Turns off one or more channels. (V5)
+
+   SYNOPSIS
+        PTStartFade(Module, Channel)
+                    A0      D0
+
+        void PTStartFade(struct Module *, BYTE);
+
+   FUNCTION
+        This function is used to turn one or more channels off in order to
+        stop ptreplay producing sound for that channel. Note that this isn't
+        a nested command and turning off a channel that is already off will
+        give you strange results and is _not_ recomended.
+
+   INPUTS
+        Module - Module to select channels for.
+        Channel - Channels to be turned off.
+
+   RESULT
+
+   EXAMPLE
+
+   NOTES
+
+   BUGS
+        Turning a channel off will not release it to be used by other
+        programms via audio.device.
+
+   SEE ALSO
+        PTOnChannel()
+
+ptreplay.library/PTOnChannel                     ptreplay.library/PTOnChannel
+
+   NAME   
+        PTOnChannel -- Turns on one or more channels. (V5)
+
+   SYNOPSIS
+        PTStartFade(Module, Channel)
+                    A0      D0
+
+        void PTStartFade(struct Module *, BYTE);
+
+   FUNCTION
+        This function is used to turn one or more channels on in order for
+        ptreplay to produce sound for that channel. Note that this isn't
+        a nested command and turning on a channel that is already on will
+        give you strange results.
+
+   EXAMPLE
+       ;Turn on all 4 channels
+       PTOnChannel(Mod, $f);
+
+       ;Turn on channel 0,1 & 2
+       PTOnChannel(Mod, &7);
+
+   INPUTS
+        Module - Module to select channels for.
+        Channel - Channels to be turned on.
+
+   SEE ALSO
+        PTOffChannel()
+
+ptreplay.library/PTPatternData                 ptreplay.library/PTPatternData
+
+   NAME
+        PTPatternData -- Returns the adress of specified pattern/row (V4)
+
+   SYNOPSIS
+        RowData=PTPatternData(Module, PatternNum, RowNum)
+        D0                    A0      D0          D1
+
+        APTR PTPatternData(struct Module *, UBYTE, UBYTE);
+
+   FUNCTION
+        This function returns a pointer to the given row in the specified
+        pattern.
+
+   INPUTS
+        Module     - Pointer to the module you which to examine.
+        PatternNum - The pattern (0-127) you want to examine.
+        RowNum      - And finaly which row (0-63) to examine.
+
+   RESULT
+        RowData - A pointer to the given position
+
+ptreplay.library/PTPatternPos                   ptreplay.library/PTPatternPos
+
+   NAME
+        PTPatternPos -- Returns the patternrow currently playing (V4)
+
+   SYNOPSIS
+        Row=PTPatternPos(module)
+        D0               A0
+
+        UBYTE PTPatternPos(struct Module *);
+
+   FUNCTION
+        Returns the row in the pattern that it is currently being played.
+
+   INPUTS
+        module - A module that is currently being played.
+
+   RESULT
+        Row - The row (0-63 $00-$40) that is being played.
+
+ptreplay.library/PTPause                             ptreplay.library/PTPause
+
+   NAME
+        PTPause -- pauses a module.
+
+   SYNOPSIS
+        PTPause(module)
+                A0
+
+        void PTPause(struct Module *);
+
+   FUNCTION
+        Pause this module, remembering the position so that you can restart
+        it later. All sound is turned off.
+
+   INPUTS
+        module - pointer to module control structure.
+
+   NOTES
+        All channels are still allocated at the same priority after this
+        functions has returned so it's vise to lower the priority to -128
+        before calling this function.
+
+   SEE ALSO
+        PTResume()
+
+ptreplay.library/PTPlay                               ptreplay.library/PTPlay
+
+   NAME
+        PTPlay -- Plays a module
+
+   SYNOPSIS
+        PTPlay(module)
+                A0
+
+        void PTPlay(struct Module *);
+
+   FUNCTION
+        Start playing the module from the beginning. If this module already
+        was playing, it starts over from the beginning.
+
+   INPUTS
+        module - pointer to module control structure.
+
+   BUGS
+        It is not yet supported to call this function while another module
+        is playing.
+        If another module is playing, it will be stopped and this will be
+        played instead. (V5)
+
+   SEE ALSO
+        PTStop()
+
+ptreplay.library/PTResume                           ptreplay.library/PTResume
+
+   NAME
+        PTResume -- restarts a paused module.
+
+   SYNOPSIS
+        PTResume(module)
+                 A0
+
+        void PTResume(struct Module *);
+
+   FUNCTION
+        Resume playing this module, after it was paused. If it was not
+        paused then nothing happens. Becasue PTPause&PTResume doesn't nest
+        will the module continue after the first call to PTResume.
+
+   INPUTS
+        module - pointer to module control structure.
+
+   SEE ALSO
+        PTPause()
+
+ptreplay.library/PTSetPos                           ptreplay.library/PTSetPos
+
+   NAME   
+        PTSetPos -- Changes the position for a playing module. (V5)
+
+   SYNOPSIS
+        PTSetPos(Module, Pos)
+                 A0      D0
+
+        void PTSetPos(struct Module *, UBYTE);
+
+   FUNCTION
+        This function changes the position which we are playing to the new
+        one.
+
+   INPUTS
+        Module - Module to change pos in.
+        Pos - The new position 0 - SongLen-1
+
+   SEE ALSO
+        PTSongPos(), PTSongLen()
+
+ptreplay.library/PTSetPri                           ptreplay.library/PTSetPri
+
+   NAME
+        PTSetPri -- Sets the priority that ptreplay should use. (V5)
+
+   SYNOPSIS
+        PTSetPri(Pri)
+                 D0
+
+        void PTSetPri(BYTE);
+
+   FUNCTION
+        This function changes the priority on wich ptreplay hold it's
+        channels. It deafults to -128 and is also reset to -128 every time
+        the library is closed (OpenCnt==NULL).
+
+        NOTE for V6: Now the channels are completly freed when the library
+        is closed.
+
+   INPUTS
+        Pri - The new priority
+
+   SEE ALSO
+        PTGetPri()
+
+ptreplay.library/PTSetupMod                       ptreplay.library/PTSetupMod
+
+   NAME
+        PTSetupMod -- Creates a control structure for a loaded module. (V4)
+
+   SYNOPSIS
+        Module = PTSetupMod(LoadedMod);
+        D0                  A0
+
+        struct Module *PTSetupMod(APTR);
+
+   FUNCTION
+        This function will allocate a module control structure and intilize
+        it using an already loaded module file in order to use in with
+        ptreplay.
+
+   INPUTS
+        LoadedMod - An pointer to an already loaded module.
+
+   RESULT
+        Module - A module control structure ready to use.
+
+   EXAMPLE
+        /* This routine will do the same thing as PTLoadMod */
+        BPTR File;
+        APTR Mod;
+        int Len;
+        struct Module *Module;
+
+        File=Open("mod.module",MODE_OLDFILE))
+        Seek(File, 0l, OFFSET_END);
+        Len=Seek(File, 0l, OFFSET_BEGINNING);
+
+        Mod=AllocMem(Len, MEMF_CHIP);
+        Read(File, Mod, Len);
+        Close(File);
+        Module=PTSetupMod(Mod);
+
+   NOTES
+        1. The module MUST already be located in chip mem.
+        2. The module MUST be valid while the module is going to be used.
+        Both may change in future.
+
+   SEE ALSO
+        PTFreeMod()
+
+ptreplay.library/PTSetVolume                     ptreplay.library/PTSetVolume
+
+   NAME   
+        PTSetVolume -- Sets the base volume (V3)
+
+   SYNOPSIS
+        PTSetVolume(module,volume)
+                    A0     D0
+
+        void PTSetVolume(struct Module *, UBYTE);
+
+   FUNCTION
+        This function will change the base volume that ptreplay uses to
+        calculate the "real" volume for the specified module.
+        
+        The new volume is first multiplied by this value and then shifted
+        right 6 steps.
+
+   INPUTS
+        module - pointer to module.
+        speed - new volume  0-64 ($00-$40)
+
+   SEE ALSO
+        Fade(), StartFade().
+
+ptreplay.library/PTSongLen                         ptreplay.library/PTSongLen
+
+   NAME
+        PTSongLen -- returns songlength (V4)
+
+   SYNOPSIS
+        Len=PTSongLen(module)
+        d0            a0
+
+        UBYTE PTSongLen(struct Module *);
+
+   FUNCTION
+        This funktion returns the length of the module in positions. This
+        is the same value as Length in ProTracker and means that it will
+        play until position Len-1.
+
+   INPUTS
+        module - The module whos length you which to now.
+
+   RESULT
+        Len - Number of positions in module
+
+ptreplay.library/PTSongPattern                 ptreplay.library/PTSongPattern
+
+   NAME   
+        PTSongPattern -- Returns pattern at a given position (V4)
+
+   SYNOPSIS
+        PatNum=PTSongPattern(module, pos)
+        D0                   A0      D0
+
+        UBYTE PTSongPattern(struct Module *,UWORD);
+
+   FUNCTION
+        Returns the pattern number at a given position.
+
+   INPUTS
+        Module - The module you want to examine
+        Pos - The position (0-127) you want to examine.
+
+   RESULT
+        PatNum - A number (0-127) telling you which pattern is to be played.
+
+ptreplay.library/PTSongPos                         ptreplay.library/PTSongPos
+
+   NAME
+        PTSongPos -- Gives you the current song position (V4)
+
+   SYNOPSIS
+        Pos=PTSongPos(module);
+        d0            A0
+
+        UBYTE PTSongPos(struct Module *)
+
+   FUNCTION
+        This function returns the position the module is curently playing.
+
+   INPUTS
+        module - pointer to a module that is playing.
+
+   RESULT
+        Pos - position 0 - (Length-1)
+
+   SEE ALSO
+        PTSetPos()
+
+ptreplay.library/PTStartFade                     ptreplay.library/PTStartFade
+
+   NAME
+        PTStartFade -- Let a module fade-away before it's stopped (V4)
+
+   SYNOPSIS
+        PTStartFade(Module, Speed)
+                    A0      D0
+
+        void PTStartFade(struct Module *, UBYTE);
+
+   FUNCTION
+        This function will also do a smooth volume slidedown in the same way
+        as PTFade does but it returns as soon as the fading has started
+        instead of when it is done. Currently the only way to notice when
+        the module is stoped is to setup a Fade bit using PTInstallBits and
+        check for that bit.
+
+   INPUTS
+        Module - Module to be stoped.
+        Speed - fading speed.
+
+   SEE ALSO
+        PTFade(), PTInstallBits()
+
+ptreplay.library/PTStop                               ptreplay.library/PTStop
+
+   NAME
+        PTStop -- Stops a module that is playing.
+
+   SYNOPSIS
+        PTStop(module)
+                A0
+
+        void PTStop(struct Module *);
+
+   FUNCTION
+        Stop playing the given module. If it wasn't playing, nothing
+        happens.
+
+   INPUTS
+        module - pointer to module control structure.
+
+   SEE ALSO
+        PTPlay(), PTFade()
+
+ptreplay.library/PTUnloadModule               ptreplay.library/PTUnloadModule
+
+   NAME
+        PTUnloadModule -- Deallocates a loaded module.
+
+   SYNOPSIS
+        PTUnloadModule(module)
+                        A0
+
+        void PTUnloadModule(struct Module *);
+
+   FUNCTION
+        Deallocates a previsly loaded module, returning all it's resources
+        to the system.
+
+   INPUTS
+        module - pointer to module control structure returned by LoadModule.
+
+   BUGS
+        Does not check that module is stopped. If you call this function on
+        a module that is playing, you _will_ cause a System Failure. You
+        have been warned.
+
+   SEE ALSO
+        PTFreeMod(), PTStop()
+
+

@@ -1,0 +1,1 @@
+OBJS	=	 control.o control_temp.o PT-Player.o

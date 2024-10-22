@@ -1,0 +1,16 @@
+
+                        PT-Player 2.0
+
+PT-Player will give you a nice GUI towards ptreplay.library.
+
+It can be started from both shell and workbench and it will remove itself
+from the shellwindow if necesery, then it opens a window on the deafult
+public screen (most likly the workbench screen).
+
+At the top of the window you have the name of the currently loaded module.
+Under that you have to 2 numbers and a checkbox. Length is the length of
+this module in number of positions, pos is the pos that is currently being
+played and Loop tells you wheter this module should be looped of played
+only once (to next EndOfModule mark actually).
+
+Underneeth that you have 6 buttons which loads,plays,pauses, stops a module.
