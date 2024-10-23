@@ -42,13 +42,39 @@ struct PTSample * _PTReplay_PTGetSample(struct PTReplayIFace *Self,
 	//IExec->DebugPrintF("Function ptreplay::PTGetSample not implemented\n"); 
 	dbug(("ptreplay::PTGetSample TESTME!\n"));
 
-	pt_sample_s		*s;
+        typedef struct PTSample
+        {
+            UBYTE Name[22];    // Null terminated string with samplename 
+            UWORD Length;      // Sample length in words 
+            UBYTE FineTune;    // FineTune of sample in lower 4 bits 
+            UBYTE Volume;      // Volume of sample 
+            UWORD Repeat;      // Repeat start in number of words 
+            UWORD Replen;      // Repeat length in number of words 
+        }PTSample;
+
+     WORD num;
+	pt_sample_s *s;
 	pt_mod_s	*mod;
-	Nr = Nr & 31;
+     struct PTSample *r;
+
+
+	num = Nr & 31;
 	ObtainSemaphore(&module->mutex);
 	mod = (pt_mod_s *)module->mod_handle;
-	s = (pt_sample_s *)&mod->sample[Nr];
-	ReleaseSemaphore(&module->mutex);
+	s = &mod->sample[num];
+
 	
-	return s;
+     for (int l = 0; l < 22; ++l){
+		r->Name[l] = s->name[l];
+     }
+
+     
+     //r->Name = sname;
+     r->Length = (UWORD)s->length;
+     r->FineTune = (UBYTE)s->ft;
+     r->Volume = (UBYTE)s->volume;
+     r->Repeat = (UWORD)s->repeat;
+     r->Replen = (UWORD)s->replen;
+	ReleaseSemaphore(&module->mutex);
+	return (struct PTSample *)r;
 	}

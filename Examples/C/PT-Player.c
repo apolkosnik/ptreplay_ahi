@@ -24,6 +24,7 @@
 #include <pragmas/asl_pragmas.h>
 
 #include <string.h>
+#include <stdio.h>
 
 #include "control.h"
 //#include "include/ptreplay_protos.h"
@@ -32,7 +33,7 @@
 
 struct Library *PTReplayBase;
 
-struct Module *Mod = NULL;
+struct Module *Mod;
 struct FileRequester *FileReq = NULL;
 
 STRPTR vstr = "$VER: PT-Player 2.1 ";
@@ -55,7 +56,8 @@ void MainRoutine(void)
 {
 BOOL Running=TRUE;
 ULONG Flags,WinMask,StopMask,PatternMask,RowMask;
-UBYTE Pos, Pat, Row;
+UBYTE Pos, Pat,Row;
+APTR *RowData;
 
 	WinMask=1L<<ControlWnd->UserPort->mp_SigBit;
 	StopMask=1L<<StopBit;
@@ -85,6 +87,13 @@ UBYTE Pos, Pat, Row;
 			Row=PTPatternPos(Mod);
 			GT_SetGadgetAttrs(ControlGadgets[GD_Row], ControlWnd, NULL,
 								GTNM_Number, Row, TAG_DONE);
+			RowData=PTPatternData(Mod,Pat,Row);
+			GT_SetGadgetAttrs(ControlGadgets[GD_RData], ControlWnd, NULL,
+								GTTX_Text, "..." , TAG_DONE);
+			
+			     for (int l = 0; l < 64; ++l){
+					printf("%d:%lx  \n", l, RowData[l]);
+    			 }
 		}
 	}
 }

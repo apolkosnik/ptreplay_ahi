@@ -38,11 +38,11 @@ APTR                   VisualInfo = NULL;
 struct Window         *ControlWnd = NULL;
 struct Gadget         *ControlGList = NULL;
 struct IntuiMessage    ControlMsg;
-struct Gadget         *ControlGadgets[11];
+struct Gadget         *ControlGadgets[GD_COUNT];
 UWORD                  ControlLeft = 150;
 UWORD                  ControlTop = 41;
-UWORD                  ControlWidth = 298;
-UWORD                  ControlHeight = 91;
+UWORD                  ControlWidth = 300;
+UWORD                  ControlHeight = 141;
 UBYTE                 *ControlWdt = (UBYTE *)"Player Control";
 struct TextAttr       *Font, Attr;
 UWORD                  FontX, FontY;
@@ -51,6 +51,7 @@ struct TextFont       *ControlFont = NULL;
 
 UWORD ControlGTypes[] = {
 	TEXT_KIND,
+	CHECKBOX_KIND,
 	BUTTON_KIND,
 	BUTTON_KIND,
 	BUTTON_KIND,
@@ -61,26 +62,30 @@ UWORD ControlGTypes[] = {
 	NUMBER_KIND,
 	NUMBER_KIND,
 	NUMBER_KIND,
-	CHECKBOX_KIND
+	TEXT_KIND
+	
 };
 
 struct NewGadget ControlNGad[] = {
 	4, 13, 289, 13, (UBYTE *)"Module", NULL, GD_Module, PLACETEXT_ABOVE, NULL, NULL,
+	267, 3, 26, 11, (UBYTE *)"L_oop", NULL, GD_Loop, PLACETEXT_LEFT, NULL, (APTR)LoopClicked,
 	12, 49, 81, 17, (UBYTE *)"_Play", NULL, GD_Play, PLACETEXT_IN, NULL, (APTR)PlayClicked,
 	204, 49, 81, 17, (UBYTE *)"_Stop", NULL, GD_Stop, PLACETEXT_IN, NULL, (APTR)StopClicked,
 	108, 69, 81, 17, (UBYTE *)"_Quit", NULL, GD_Quit, PLACETEXT_IN, NULL, (APTR)QuitClicked,
-	108, 49, 81, 17, (UBYTE *)"(Un)P_ause", NULL, GD_Pause, PLACETEXT_IN, NULL, (APTR)PauseClicked,
+	108, 49, 81, 17, (UBYTE *)"UnP_ause", NULL, GD_Pause, PLACETEXT_IN, NULL, (APTR)PauseClicked,
 	12, 69, 81, 17, (UBYTE *)"_Load", NULL, GD_Load, PLACETEXT_IN, NULL, (APTR)LoadClicked,
 	204, 69, 81, 17, (UBYTE *)"_Fade", NULL, GD_Fade, PLACETEXT_IN, NULL, (APTR)FadeClicked,
 	42, 29, 33, 13, (UBYTE *)"Len", NULL, GD_Length, PLACETEXT_LEFT, NULL, NULL,
 	112, 29, 33, 13, (UBYTE *)"Pos", NULL, GD_Pos, PLACETEXT_LEFT, NULL, NULL,
 	182, 29, 33, 13, (UBYTE *)"Pat", NULL, GD_Pat, PLACETEXT_LEFT, NULL, NULL,
 	252, 29, 33, 13, (UBYTE *)"Row", NULL, GD_Row, PLACETEXT_LEFT, NULL, NULL,
-	267, 3, 26, 11, (UBYTE *)"L_oop", NULL, GD_Loop, PLACETEXT_LEFT, NULL, (APTR)LoopClicked
+	4, 106, 289, 13, (UBYTE *)"RData", NULL, GD_RData, PLACETEXT_ABOVE, NULL, NULL
+
 };
 
 ULONG ControlGTags[] = {
 	(GTTX_Text), (ULONG)"None", (GTTX_Border), TRUE, (TAG_DONE),
+	(GTCB_Checked), FALSE, (GT_Underscore), '_', (TAG_DONE),
 	(GT_Underscore), '_', (TAG_DONE),
 	(GT_Underscore), '_', (TAG_DONE),
 	(GT_Underscore), '_', (TAG_DONE),
@@ -91,7 +96,7 @@ ULONG ControlGTags[] = {
 	(GTNM_Border), TRUE, (TAG_DONE),
 	(GTNM_Border), TRUE, (TAG_DONE),
 	(GTNM_Border), TRUE, (TAG_DONE),
-	(GTCB_Checked), FALSE, (GT_Underscore), '_', (TAG_DONE)
+	(GTTX_Text), (ULONG)"something", (GTTX_Border), TRUE, (TAG_DONE)
 };
 
 static UWORD ComputeX( UWORD value )
@@ -162,8 +167,9 @@ void ControlRender( void )
 	DrawBevelBox( ControlWnd->RPort, OffX + ComputeX( 4 ),
 					OffY + ComputeY( 45 ),
 					ComputeX( 289 ),
-					ComputeY( 44 ),
+					ComputeY( 45 ),
 					GT_VisualInfo, VisualInfo, GTBB_Recessed, TRUE, TAG_DONE );
+
 }
 
 int HandleControlIDCMP( void )
@@ -225,7 +231,7 @@ int OpenControlWindow( void )
 	if ( ! ( g = CreateContext( &ControlGList )))
 		return( 1L );
 
-	for( lc = 0, tc = 0; lc < Control_CNT; lc++ ) {
+	for( lc = 0, tc = 0; lc < GD_COUNT; lc++ ) {
 
 		CopyMem((char * )&ControlNGad[ lc ], (char * )&ng, (long)sizeof( struct NewGadget ));
 

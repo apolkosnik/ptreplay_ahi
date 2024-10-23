@@ -5,6 +5,7 @@
 #include <libraries/gadtools.h>
 #include <intuition/intuition.h>
 #include <string.h>
+#include <stdio.h>
 
 #include <clib/dos_protos.h>
 #include <clib/asl_protos.h>
@@ -18,44 +19,48 @@
 //#include "include/ptreplay_pragmas.h"
 #include "include/ptreplay.h"
 
-
-
 int PlayClicked( void )
 {
-UBYTE Pos,Pat,Row;
-	/* routine when gadget "_Play" is clicked. */
-	PTPlay(Mod);
+            if(Mod) {
+                UBYTE Pos,Pat,Row;
+            	/* routine when gadget "_Play" is clicked. */
+            	PTPlay(Mod);
 
-	/* refresh the Song position and Pattern number */
-	Pos=PTSongPos(Mod);
-	GT_SetGadgetAttrs(ControlGadgets[GD_Pos], ControlWnd, NULL,
+            	/* refresh the Song position and Pattern number */
+            	Pos=PTSongPos(Mod);
+            	GT_SetGadgetAttrs(ControlGadgets[GD_Pos], ControlWnd, NULL,
 						GTNM_Number, Pos, TAG_DONE);
-	Pat=PTSongPattern(Mod,Pos);
-	GT_SetGadgetAttrs(ControlGadgets[GD_Pat], ControlWnd, NULL,
+            	Pat=PTSongPattern(Mod,Pos);
+            	GT_SetGadgetAttrs(ControlGadgets[GD_Pat], ControlWnd, NULL,
 						GTNM_Number, Pat, TAG_DONE);
 
-	Row=PTPatternPos(Mod);
-	GT_SetGadgetAttrs(ControlGadgets[GD_Row], ControlWnd, NULL,
-						GTNM_Number, Row, TAG_DONE);
+            	Row=PTPatternPos(Mod);
+            	GT_SetGadgetAttrs(ControlGadgets[GD_Row], ControlWnd, NULL,
+            					GTNM_Number, Row, TAG_DONE);
+	}
 	return(TRUE);
 }
 
 int StopClicked( void )
 {
 UBYTE Pos,Pat,Row;
-	/* routine when gadget "_Stop" is clicked. */
-	PTStop(Mod);
 	
-	/* refresh the Song position and Pattern number */
-	Pos=PTSongPos(Mod);
-	GT_SetGadgetAttrs(ControlGadgets[GD_Pos], ControlWnd, NULL,
-						GTNM_Number, Pos, TAG_DONE);
-	Pat=PTSongPattern(Mod,Pos);
-	GT_SetGadgetAttrs(ControlGadgets[GD_Pat], ControlWnd, NULL,
-						GTNM_Number, Pat, TAG_DONE);
-	Row=PTPatternPos(Mod);
-	GT_SetGadgetAttrs(ControlGadgets[GD_Row], ControlWnd, NULL,
-						GTNM_Number, Row, TAG_DONE);
+	
+	if(Mod){
+            	/* routine when gadget "_Stop" is clicked. */
+            	PTStop(Mod);
+
+            	/* refresh the Song position and Pattern number */
+            	Pos=PTSongPos(Mod);
+            	GT_SetGadgetAttrs(ControlGadgets[GD_Pos], ControlWnd, NULL,
+            					GTNM_Number, Pos, TAG_DONE);
+            	Pat=PTSongPattern(Mod,Pos);
+            	GT_SetGadgetAttrs(ControlGadgets[GD_Pat], ControlWnd, NULL,
+            					GTNM_Number, Pat, TAG_DONE);
+            	Row=PTPatternPos(Mod);
+            	GT_SetGadgetAttrs(ControlGadgets[GD_Row], ControlWnd, NULL,
+        						GTNM_Number, Row, TAG_DONE);
+        	}
 	return(TRUE);
 }
 
@@ -73,16 +78,19 @@ int QuitClicked( void )
 int PauseClicked( void )
 {
 UBYTE Row;
-	/* routine when gadget "P_ause" is clicked. */
-	if(Paused)
-		PTResume(Mod);
-	else
-		PTPause(Mod);
+	
+	if(Mod){
+            	/* routine when gadget "P_ause" is clicked. */
+            	if(Paused)
+            		PTResume(Mod);
+            	else
+            		PTPause(Mod);
 
-	Paused=~Paused;
-	Row=PTPatternPos(Mod);
-	GT_SetGadgetAttrs(ControlGadgets[GD_Row], ControlWnd, NULL,
+            	Paused=~Paused;
+            	Row=PTPatternPos(Mod);
+            	GT_SetGadgetAttrs(ControlGadgets[GD_Row], ControlWnd, NULL,
 						GTNM_Number, Row, TAG_DONE);
+	}
 	return(TRUE);
 }
 
@@ -90,6 +98,10 @@ int LoadClicked( void )
 {
 char Buffer[512];
 UBYTE Len,Pos,Pat,Row;
+//APTR *RowData;
+struct Module *Modz;
+
+
 
 	PTStop(Mod);
 
@@ -101,6 +113,7 @@ UBYTE Len,Pos,Pat,Row;
 		if(Mod=PTLoadModule(Buffer))
 		{
 			PTInstallBits(Mod, StopBit, PatternBit, RowBit, -1);
+			
 			GT_SetGadgetAttrs(ControlGadgets[GD_Module], ControlWnd, NULL,
 								GTTX_Text, FileReq->fr_File, TAG_DONE);
 			Len=PTSongLen(Mod);
@@ -115,6 +128,10 @@ UBYTE Len,Pos,Pat,Row;
 			Row=PTPatternPos(Mod);
 			GT_SetGadgetAttrs(ControlGadgets[GD_Row], ControlWnd, NULL,
 								GTNM_Number, Row, TAG_DONE);
+			//RowData=PTPatternData(Mod,Pat,Row);
+			GT_SetGadgetAttrs(ControlGadgets[GD_RData], ControlWnd, NULL,
+								GTTX_Text, "--", TAG_DONE);
+
 		}
 	}
 
@@ -123,13 +140,17 @@ UBYTE Len,Pos,Pat,Row;
 
 int FadeClicked( void )
 {
-	/* routine when gadget "_Fade" is clicked. */
-	PTStartFade(Mod,1);
+            if(Mod){
+            	/* routine when gadget "_Fade" is clicked. */
+            	PTStartFade(Mod,1);
+            }
 	return(TRUE);
 }
 
 int LoopClicked( void )
 {
+
+	
 	/* routine when gadget "L_oop" is clicked. */
 	Loop=ControlGadgets[GD_Loop]->Flags & GFLG_SELECTED;
 	return(TRUE);
@@ -148,9 +169,23 @@ int ControlCloseWindow( void )
 
 int ControlVanillaKey( void )
 {
+ ULONG    ltick;
 	/* routine for "IDCMP_VANILLAKEY". */
 	switch(ControlMsg.Code)
 	{
+
+		case 'o':
+		case 'O':
+                               
+                                GT_GetGadgetAttrs(ControlGadgets[GD_Loop], ControlWnd, NULL,
+            					GTCB_Checked, &ltick, TAG_DONE);
+                                if(ltick==TRUE){ ltick=FALSE;}
+                                else { ltick=TRUE; }            
+                                GT_SetGadgetAttrs(ControlGadgets[GD_Loop], ControlWnd, NULL,
+						GTCB_Checked, ltick, TAG_DONE);
+			//LoopClicked();
+			break;
+
 		case 'p':
 		case 'P':
 			PlayClicked();

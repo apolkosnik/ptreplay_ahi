@@ -208,6 +208,6 @@ out:
 
 	/* No need to explicitly free signals on exit */
 
-	Forbid();
+	//Forbid(); WTH?!
 	ReplyMsg(&msg->death_msg);
 }

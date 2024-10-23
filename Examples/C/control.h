@@ -15,33 +15,23 @@ extern struct FileRequester *FileReq;
 #define GetString( g )      ((( struct StringInfo * )g->SpecialInfo )->Buffer  )
 #define GetNumber( g )      ((( struct StringInfo * )g->SpecialInfo )->LongInt )
 
-#define GD_Module                              0
-#define GD_Play                                1
-#define GD_Stop                                2
-#define GD_Quit                                3
-#define GD_Pause                               4
-#define GD_Load                                5
-#define GD_Fade                                6
-#define GD_Length                              7
-#define GD_Pos                                 8
-#define GD_Pat                                 9
-#define GD_Row                                 10
-#define GD_Loop                                11
+enum GD {
+    GD_Module = 0,
+    GD_Loop,
+    GD_Play,
+    GD_Stop,
+    GD_Quit,
+    GD_Pause,
+    GD_Load,
+    GD_Fade,
+    GD_Length,
+    GD_Pos,
+    GD_Pat,
+    GD_Row,
+    GD_RData,
+    GD_COUNT
+};
 
-#define GDX_Module                             0
-#define GDX_Play                               1
-#define GDX_Stop                               2
-#define GDX_Quit                               3
-#define GDX_Pause                              4
-#define GDX_Load                               5
-#define GDX_Fade                               6
-#define GDX_Length                             7
-#define GDX_Pos                                8
-#define GDX_Pat                                9
-#define GDX_Row                                10
-#define GDX_Loop                               11
-
-#define Control_CNT 12
 
 extern struct IntuitionBase *IntuitionBase;
 extern struct Library       *GadToolsBase;
@@ -56,7 +46,7 @@ extern APTR                  VisualInfo;
 extern struct Window        *ControlWnd;
 extern struct Gadget        *ControlGList;
 extern struct IntuiMessage   ControlMsg;
-extern struct Gadget        *ControlGadgets[11];
+extern struct Gadget        *ControlGadgets[GD_COUNT];
 extern UWORD                 ControlLeft;
 extern UWORD                 ControlTop;
 extern UWORD                 ControlWidth;

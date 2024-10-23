@@ -13,7 +13,7 @@ CC			=	$(VBCC)/bin/vc
 CDEFS		=	+aos68k -DAROS_ALMOST_COMPATIBLE
 
 CWARN		=	
-CFLAGS	=	$(CDEFS) $(CWARN) -D__VBCC__ -DAMIGA -DAMIGAOS +aos68k -O3 -c -c99 -schedule -maxoptpasses=40 -cpu=68020 -I$VBCC/targets/m68k-amigaos/include -Iinclude -k -inline-size=40 -unroll-size=40
+CFLAGS	=	$(CDEFS) $(CWARN) -D__VBCC__ -DAMIGA -DAMIGAOS +aos68k -O3 -c -schedule -maxoptpasses=40 -cpu=68020 -I$VBCC/targets/m68k-amigaos/include -Iinclude -k -inline-size=40 -unroll-size=40
 
 LDFLAGS	=	+aos68k -lauto -lamiga -nostartfiles -final 
 TARGET	=	PT-Player SmallPlay
